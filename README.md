@@ -1,2 +1,3 @@
-# epidem_model
+# Epidemic model
+
 SEQIJR model of epidemics
