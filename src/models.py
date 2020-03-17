@@ -67,11 +67,11 @@ def seir_model(N: int, states: np.ndarray, params: np.ndarray) -> np.ndarray:
     S, E, I, R, D = states
     β, ε, σ, ρ, μ = params
 
-    changeStates = np.ndarray([- (β*I + ε*E) * S/N,
-                               (β*I + ε*E) * S/N - σ*E,
-                               σ*E - ρ*I - μ*I,
-                               ρ*I,
-                               μ*I
-                               ])
+    changeStates = np.array([- (β*I + ε*E) * S/N,
+                             (β*I + ε*E) * S/N - σ*E,
+                             σ*E - ρ*I - μ*I,
+                             ρ*I,
+                             μ*I
+                             ])
 
     return changeStates
