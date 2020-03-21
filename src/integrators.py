@@ -74,8 +74,8 @@ def runge_kutta_4(epidemicModel, N: int, states: np.ndarray,
     states4 = epidemicModel(N, states + 1/2 * step * states3, params)
 
     # Calculate next position and velocity
-    statesNext = states + 1/6 * step * (states1 + 2*states2 + 2*states3 \
-        + states4)
+    statesNext = states + 1/6 * step * (states1 + 2*states2 + 2*states3
+                                        + states4)
 
     # Return next state
     return statesNext

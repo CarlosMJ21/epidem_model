@@ -83,7 +83,6 @@ def main():
                                                 params,
                                                 step)
 
-
     plt.figure()
     ax = plt.axes()
     # Set the limits to the axes
@@ -115,4 +114,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
