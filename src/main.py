@@ -61,15 +61,16 @@ def main():
     N = np.sum(initialStates)
 
     # Parameters [β ε σ ρ μ]
-    params = [1/12, 1/24, 1/(7*24), 1/(14*24), 0.]
+    params = [1/96, 1/48, 1/(7*24), 1/(14*24), 0.]
 
     # Step in hours
     step = 1.
 
     # Period in days
-    T = 60.
+    T = 30.
 
     n = int(T * 24 / step)
+    time = np.linspace(0, T*24, n+1)[:-1]/24
 
     statesAllPeriod = np.zeros((n, 5))
 
@@ -83,7 +84,33 @@ def main():
                                                 step)
 
 
+    plt.figure()
+    ax = plt.axes()
+    # Set the limits to the axes
+    ax.set_xlim(0, T)
+    ax.set_ylim(0, N*1.01)
 
+    # Set the title of the animation
+    ax.set_title('Epidemic curves')
+
+    # Set the label of the axes
+    ax.set_xlabel('Time [h]')
+    ax.set_ylabel('Number of people')
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(24))
+
+    # Plot the different
+    ax.plot(time, statesAllPeriod[:, 0], color='blue', lw='2',
+            label='Susceptible cases')
+    ax.plot(time, statesAllPeriod[:, 1], color='yellow', lw='2',
+            label='Exposed cases')
+    ax.plot(time, statesAllPeriod[:, 2], color='red', lw='2',
+            label='Infected cases')
+    ax.plot(time, statesAllPeriod[:, 3], color='green', lw='2',
+            label='Recovered cases')
+    ax.plot(time, statesAllPeriod[:, 4], color='black', lw='2',
+            label='Dead cases')
+
+    ax.legend()
 
 
 if __name__ == "__main__":
