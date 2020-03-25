@@ -116,9 +116,10 @@ def get_curves(epidemicModel: str, initialStates: list, params: list,
         Parameters of the model. See README
 
     period : float [day]
-
+        Duration of the integration
 
     step : float [h]
+        Time steps of the integration
 
     Returns
     ----------
@@ -148,6 +149,41 @@ def get_curves(epidemicModel: str, initialStates: list, params: list,
                                                 step)
 
     return statesAllPeriod, time
+
+def fitness_function(epidemicModel: str, initialStates: list, params: list,
+               period: float, step: float, realData: np.ndarray,
+               **kwargs) -> float:
+    """
+    Function that obtain the integrated curves of states
+
+    Parameters
+    ----------
+    epidemicModel : function
+        Epidemic model
+
+    initialStates : np.ndarray (5) [S E I R D]
+        Initial states of the population
+
+    params : np.ndarray (5) [β ε σ ρ μ]
+        Parameters of the model. See README
+
+    period : float [day]
+        Duration of the integration
+
+    step : float [h]
+        Time steps of the integration
+
+    Returns
+    ----------
+    statesAllPeriod : float
+
+    """
+    simData, _ = get_curves(epidemicModel, initialStates, params, period, step)
+    simDataIRD = simData[:,2:]
+
+    cost = np.sqrt(np.mean(simDataIRD - realData))
+
+    return cost
 
 
 if __name__ == "__main__":
