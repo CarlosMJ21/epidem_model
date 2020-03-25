@@ -115,20 +115,23 @@ class Individual():
         self.mutation = mutation
         self.numGenes = len(chromosome)
 
-    def fitness_function(self):
+    def fitness_function(self, config: dict):
         """
         Performs the evaluation of the fitness function.
 
 
         Parameters
         ----------
+        config : dict
+            Configuration with the parameters of the fitness_function
 
         Returns
         -------
 
         """
+        config['params'] = self.chromosome
 
-        return self.fitnessFunc(self.chromosome)
+        return self.fitnessFunc(**config)
 
     def offspring(self, secondParent):
         """

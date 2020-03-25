@@ -216,7 +216,7 @@ class Population():
 
         """
 
-        scores = [individual.fitness_function() for individual in
-                  self.individuals]
+        scores = [individual.fitness_function(self.config['fitness_function'])
+                  for individual in self.individuals]
 
         return scores
