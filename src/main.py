@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Own Libs
-from models import seir_model
+from models import EPIDEMIC_MODELS
 from integrators import runge_kutta_4
 
 #######################################################################
@@ -64,24 +64,12 @@ def main():
     params = [1/96, 1/48, 1/(7*24), 1/(14*24), 0.]
 
     # Step in hours
-    step = 1.
+    step = 24.
 
     # Period in days
     T = 30.
 
-    n = int(T * 24 / step)
-    time = np.linspace(0, T*24, n+1)[:-1]/24
-
-    statesAllPeriod = np.zeros((n, 5))
-
-    statesAllPeriod[0, :] = initialStates
-
-    for i in range(n-1):
-        statesAllPeriod[i+1, :] = runge_kutta_4(seir_model,
-                                                N,
-                                                statesAllPeriod[i, :],
-                                                params,
-                                                step)
+    statesAllPeriod, time = get_curves('SEIR', initialStates, params, T, step)
 
     plt.figure()
     ax = plt.axes()
@@ -110,6 +98,56 @@ def main():
             label='Dead cases')
 
     ax.legend()
+
+def get_curves(epidemicModel: str, initialStates: list, params: list,
+               period: float, step: float) -> np.ndarray:
+    """
+    Function that obtain the integrated curves of states
+
+    Parameters
+    ----------
+    epidemicModel : function
+        Epidemic model
+
+    initialStates : np.ndarray (5) [S E I R D]
+        Initial states of the population
+
+    params : np.ndarray (5) [β ε σ ρ μ]
+        Parameters of the model. See README
+
+    period : float [day]
+
+
+    step : float [h]
+
+    Returns
+    ----------
+    statesAllPeriod : np.ndarray (Nx5) [S E I R D]
+        Integration over the whole period
+
+    time : np.ndarray (N) [d]
+        Time of integrated states
+
+    """
+    # Epidemic model chosen
+    model = EPIDEMIC_MODELS[epidemicModel]
+
+    N = np.sum(initialStates)
+    n = int(period * 24 / step)
+    time = np.linspace(0, period*24, n+1)[:-1]/24
+
+    statesAllPeriod = np.zeros((n, 5))
+
+    statesAllPeriod[0, :] = initialStates
+
+    for i in range(n-1):
+        statesAllPeriod[i+1, :] = runge_kutta_4(model,
+                                                N,
+                                                statesAllPeriod[i, :],
+                                                params,
+                                                step)
+
+    return statesAllPeriod, time
 
 
 if __name__ == "__main__":

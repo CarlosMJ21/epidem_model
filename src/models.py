@@ -58,7 +58,7 @@ def seir_model(N: int, states: np.ndarray, params: np.ndarray) -> np.ndarray:
     Returns
     ----------
     changeStates : np.ndarray (5) [S E I R D]
-        New
+        New states
 
     """
 
@@ -74,3 +74,6 @@ def seir_model(N: int, states: np.ndarray, params: np.ndarray) -> np.ndarray:
                              ])
 
     return changeStates
+
+
+EPIDEMIC_MODELS = {'SEIR': seir_model}
