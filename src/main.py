@@ -36,17 +36,20 @@ Main library
 # Other Libs
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import toml
 
 # Own Libs
-from models import seir_model
+from models import EPIDEMIC_MODELS
 from integrators import runge_kutta_4
+from GA.population import Population
 
 #######################################################################
 
 
 def main():
     """
-    Main program to execute an integration arc
+    Main program to execute an optimisation in a population
 
     Parameters
     ----------
@@ -56,32 +59,67 @@ def main():
 
     """
 
+    config = toml.load('../config/configuration.toml', _dict=dict)
+
+    realDataDf = pd.read_csv('../data/IRD_Madrid.csv')
+    realData = np.zeros((realDataDf.shape[0], 3))
+    realData[:, 0] = realDataDf[realDataDf.columns[1]]
+    realData[:, 1] = realDataDf[realDataDf.columns[2]]
+    realData[:, 2] = realDataDf[realDataDf.columns[3]]
+    config['population']['fitness_function']['realData'] = realData
+
+    population = Population(config['population'], fitness_function)
+
+    population.initialise_population()
+
+    population.optimise()
+
+    params = population.individuals[0].chromosome
+
+    return params
+
+
+def test(params):
+    """
+    Test program to execute an integration arc
+
+    Parameters
+    ----------
+    params : np.ndarray (5) [β ε σ ρ μ]
+        Parameters of the model. See README
+
+    Returns
+    ----------
+
+    """
+
+    config = toml.load('../config/configuration.toml', _dict=dict)[
+        'population']['fitness_function']
+
     # Initial states [S E I R D]
-    initialStates = [19995., 0., 5., 0., 0.]
+    initialStates = config['initialStates']
     N = np.sum(initialStates)
 
-    # Parameters [β ε σ ρ μ]
-    params = [1/96, 1/48, 1/(7*24), 1/(14*24), 0.]
-
     # Step in hours
-    step = 1.
+    step = config['step']
 
     # Period in days
-    T = 30.
+    T = config['period']
 
-    n = int(T * 24 / step)
-    time = np.linspace(0, T*24, n+1)[:-1]/24
+    statesAllPeriod, time = get_curves('SEIR', initialStates, params, T, step)
 
-    statesAllPeriod = np.zeros((n, 5))
+    # Cost function
+    realDataDf = pd.read_csv('../data/IRD_Madrid.csv')
+    realData = np.zeros((realDataDf.shape[0], 3))
+    realData[:, 0] = realDataDf[realDataDf.columns[1]]
+    realData[:, 1] = realDataDf[realDataDf.columns[2]]
+    realData[:, 2] = realDataDf[realDataDf.columns[3]]
 
-    statesAllPeriod[0, :] = initialStates
+    config['params'] = params
+    config['realData'] = realData
+    cost = fitness_function(**config)
 
-    for i in range(n-1):
-        statesAllPeriod[i+1, :] = runge_kutta_4(seir_model,
-                                                N,
-                                                statesAllPeriod[i, :],
-                                                params,
-                                                step)
+    print(cost)
 
     plt.figure()
     ax = plt.axes()
@@ -93,7 +131,7 @@ def main():
     ax.set_title('Epidemic curves')
 
     # Set the label of the axes
-    ax.set_xlabel('Time [h]')
+    ax.set_xlabel('Time [day]')
     ax.set_ylabel('Number of people')
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(24))
 
@@ -112,5 +150,95 @@ def main():
     ax.legend()
 
 
+def get_curves(epidemicModel: str, initialStates: list, params: list,
+               period: float, step: float) -> np.ndarray:
+    """
+    Function that obtain the integrated curves of states
+
+    Parameters
+    ----------
+    epidemicModel : function
+        Epidemic model
+
+    initialStates : np.ndarray (5) [S E I R D]
+        Initial states of the population
+
+    params : np.ndarray (5) [β ε σ ρ μ]
+        Parameters of the model. See README
+
+    period : float [day]
+        Duration of the integration
+
+    step : float [h]
+        Time steps of the integration
+
+    Returns
+    ----------
+    statesAllPeriod : np.ndarray (Nx5) [S E I R D]
+        Integration over the whole period
+
+    time : np.ndarray (N) [d]
+        Time of integrated states
+
+    """
+    # Epidemic model chosen
+    model = EPIDEMIC_MODELS[epidemicModel]
+
+    N = np.sum(initialStates)
+    n = int(period * 24 / step)
+    time = np.linspace(0, period*24, n+1)[:-1]/24
+
+    statesAllPeriod = np.zeros((n, 5))
+
+    statesAllPeriod[0, :] = initialStates
+
+    for i in range(n-1):
+        statesAllPeriod[i+1, :] = runge_kutta_4(model,
+                                                N,
+                                                statesAllPeriod[i, :],
+                                                params,
+                                                step)
+
+    return statesAllPeriod, time
+
+
+def fitness_function(epidemicModel: str, initialStates: list, params: list,
+                     period: float, step: float, realData: np.ndarray
+                     ) -> float:
+    """
+    Function that obtain the integrated curves of states
+
+    Parameters
+    ----------
+    epidemicModel : function
+        Epidemic model
+
+    initialStates : np.ndarray (5) [S E I R D]
+        Initial states of the population
+
+    params : np.ndarray (5) [β ε σ ρ μ]
+        Parameters of the model. See README
+
+    period : float [day]
+        Duration of the integration
+
+    step : float [h]
+        Time steps of the integration
+
+    Returns
+    ----------
+    cost : float
+        Evaluation of the cost function
+
+    """
+    simData, _ = get_curves(epidemicModel, initialStates, params, period, step)
+    simDataIRD = simData[::int(24/step), 2:]
+
+    cost = np.sqrt(np.mean((simDataIRD - realData)**2))
+
+    return cost
+
+
 if __name__ == "__main__":
-    main()
+    PARAMS = main()
+    test(PARAMS)
