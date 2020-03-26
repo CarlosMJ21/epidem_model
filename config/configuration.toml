@@ -1,0 +1,24 @@
+#######################################################################
+#
+# GENERAL CONFIGURATION
+#
+#######################################################################
+[population]
+    num_generations = 50
+    size_population = 20
+    prob_mutation = 0.1
+    pressure = 0.03
+    optimisation = 'minimise'
+    crossover = 'one_point'
+    mutation = 'normal'
+    num_genes = 5
+    min_values = [0.0, 0.0, 0.0, 0.0, 0.0]
+    max_values = [1.0, 1.0, 1.0, 1.0, 1.0]
+    
+    
+    
+[fitness_function]
+    epidemicModel = 'SEIR'
+    initialStates = [2999995.0, 0.0, 5.0, 0.0, 0.0]
+    period = 22.0
+    step = 24.0

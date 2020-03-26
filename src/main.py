@@ -36,6 +36,8 @@ Main library
 # Other Libs
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import toml
 
 # Own Libs
 from models import EPIDEMIC_MODELS
@@ -56,20 +58,36 @@ def main():
 
     """
 
+    config = toml.load('../config/configuration.toml', _dict=dict)['fitness_function']
+
     # Initial states [S E I R D]
-    initialStates = [19995., 0., 5., 0., 0.]
+    initialStates = config['initialStates']
     N = np.sum(initialStates)
 
     # Parameters [β ε σ ρ μ]
-    params = [1/96, 1/48, 1/(7*24), 1/(14*24), 0.]
+    params = [1/48, 1/48, 1/(7*24), 1/(14*24), 0.0002]
 
     # Step in hours
-    step = 24.
+    step = config['step']
 
     # Period in days
-    T = 30.
+    T = config['period']
 
     statesAllPeriod, time = get_curves('SEIR', initialStates, params, T, step)
+
+
+    # Cost function
+    realDataDf = pd.read_csv('../data/IRD_Madrid.csv')
+    realData = np.zeros((realDataDf.shape[0], 3))
+    realData[:, 0] = realDataDf[realDataDf.columns[1]]
+    realData[:, 1] = realDataDf[realDataDf.columns[2]]
+    realData[:, 2] = realDataDf[realDataDf.columns[3]]
+
+    config['params'] = params
+    config['realData'] = realData
+    cost = fitness_function(**config)
+
+    print(cost)
 
     plt.figure()
     ax = plt.axes()
@@ -150,6 +168,7 @@ def get_curves(epidemicModel: str, initialStates: list, params: list,
 
     return statesAllPeriod, time
 
+
 def fitness_function(epidemicModel: str, initialStates: list, params: list,
                period: float, step: float, realData: np.ndarray,
                **kwargs) -> float:
@@ -175,13 +194,14 @@ def fitness_function(epidemicModel: str, initialStates: list, params: list,
 
     Returns
     ----------
-    statesAllPeriod : float
+    cost : float
+        Evaluation of the cost function
 
     """
     simData, _ = get_curves(epidemicModel, initialStates, params, period, step)
     simDataIRD = simData[:,2:]
 
-    cost = np.sqrt(np.mean(simDataIRD - realData))
+    cost = np.sqrt(np.mean((simDataIRD - realData)**2))
 
     return cost
 
