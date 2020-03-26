@@ -42,13 +42,13 @@ import toml
 # Own Libs
 from models import EPIDEMIC_MODELS
 from integrators import runge_kutta_4
+from GA.population import Population
 
 #######################################################################
 
-
 def main():
     """
-    Main program to execute an integration arc
+    Main program to execute an optimisation in a population
 
     Parameters
     ----------
@@ -58,7 +58,39 @@ def main():
 
     """
 
-    config = toml.load('../config/configuration.toml', _dict=dict)['fitness_function']
+    config = toml.load('../config/configuration.toml', _dict=dict)
+
+    realDataDf = pd.read_csv('../data/IRD_Madrid.csv')
+    realData = np.zeros((realDataDf.shape[0], 3))
+    realData[:, 0] = realDataDf[realDataDf.columns[1]]
+    realData[:, 1] = realDataDf[realDataDf.columns[2]]
+    realData[:, 2] = realDataDf[realDataDf.columns[3]]
+    config['population']['fitness_function']['realData'] = realData
+
+    population = Population(config['population'], fitness_function)
+
+    population.initialise_population()
+
+    population.optimise()
+
+    print(population._scores())
+    print(population.individuals[0].chromosome)
+
+
+def test():
+    """
+    Test program to execute an integration arc
+
+    Parameters
+    ----------
+
+    Returns
+    ----------
+
+    """
+
+    config = toml.load('../config/configuration.toml', _dict=dict)[
+        'population']['fitness_function']
 
     # Initial states [S E I R D]
     initialStates = config['initialStates']
@@ -66,6 +98,7 @@ def main():
 
     # Parameters [β ε σ ρ μ]
     params = [1/48, 1/48, 1/(7*24), 1/(14*24), 0.0002]
+    params = [0.73070865, 0.03889861, 0.09185739, 0.92733924, 0.28420898]
 
     # Step in hours
     step = config['step']
@@ -99,7 +132,7 @@ def main():
     ax.set_title('Epidemic curves')
 
     # Set the label of the axes
-    ax.set_xlabel('Time [h]')
+    ax.set_xlabel('Time [day]')
     ax.set_ylabel('Number of people')
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(24))
 
@@ -199,7 +232,7 @@ def fitness_function(epidemicModel: str, initialStates: list, params: list,
 
     """
     simData, _ = get_curves(epidemicModel, initialStates, params, period, step)
-    simDataIRD = simData[:,2:]
+    simDataIRD = simData[::int(24/step),2:]
 
     cost = np.sqrt(np.mean((simDataIRD - realData)**2))
 

@@ -42,7 +42,7 @@ import numpy as np
 
 
 # Own Libs
-from individual import Individual
+from GA.individual import Individual
 
 
 #######################################################################
