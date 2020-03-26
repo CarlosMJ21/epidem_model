@@ -46,6 +46,7 @@ from GA.population import Population
 
 #######################################################################
 
+
 def main():
     """
     Main program to execute an optimisation in a population
@@ -73,7 +74,6 @@ def main():
 
     population.optimise()
 
-    print(population._scores())
     print(population.individuals[0].chromosome)
 
 
@@ -107,7 +107,6 @@ def test():
     T = config['period']
 
     statesAllPeriod, time = get_curves('SEIR', initialStates, params, T, step)
-
 
     # Cost function
     realDataDf = pd.read_csv('../data/IRD_Madrid.csv')
@@ -149,6 +148,7 @@ def test():
             label='Dead cases')
 
     ax.legend()
+
 
 def get_curves(epidemicModel: str, initialStates: list, params: list,
                period: float, step: float) -> np.ndarray:
@@ -203,8 +203,8 @@ def get_curves(epidemicModel: str, initialStates: list, params: list,
 
 
 def fitness_function(epidemicModel: str, initialStates: list, params: list,
-               period: float, step: float, realData: np.ndarray,
-               **kwargs) -> float:
+                     period: float, step: float, realData: np.ndarray
+                     ) -> float:
     """
     Function that obtain the integrated curves of states
 
@@ -232,7 +232,7 @@ def fitness_function(epidemicModel: str, initialStates: list, params: list,
 
     """
     simData, _ = get_curves(epidemicModel, initialStates, params, period, step)
-    simDataIRD = simData[::int(24/step),2:]
+    simDataIRD = simData[::int(24/step), 2:]
 
     cost = np.sqrt(np.mean((simDataIRD - realData)**2))
 
