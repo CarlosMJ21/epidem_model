@@ -74,15 +74,19 @@ def main():
 
     population.optimise()
 
-    print(population.individuals[0].chromosome)
+    params = population.individuals[0].chromosome
+
+    return params
 
 
-def test():
+def test(params):
     """
     Test program to execute an integration arc
 
     Parameters
     ----------
+    params : np.ndarray (5) [β ε σ ρ μ]
+        Parameters of the model. See README
 
     Returns
     ----------
@@ -95,10 +99,6 @@ def test():
     # Initial states [S E I R D]
     initialStates = config['initialStates']
     N = np.sum(initialStates)
-
-    # Parameters [β ε σ ρ μ]
-    params = [1/48, 1/48, 1/(7*24), 1/(14*24), 0.0002]
-    params = [0.73070865, 0.03889861, 0.09185739, 0.92733924, 0.28420898]
 
     # Step in hours
     step = config['step']
@@ -240,4 +240,5 @@ def fitness_function(epidemicModel: str, initialStates: list, params: list,
 
 
 if __name__ == "__main__":
-    main()
+    PARAMS = main()
+    test(PARAMS)
