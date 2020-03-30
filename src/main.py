@@ -243,4 +243,4 @@ def fitness_function(epidemicModel: str, initialStates: list, params: list,
 
 if __name__ == "__main__":
     PARAMS = main()
-    statesAllPeriod = test(PARAMS)
+    STATES = test(PARAMS)

@@ -230,9 +230,9 @@ class Individual():
         """
         N = self.numGenes
         # Points to choose
-        chromosomeLogical1 = np.random.choice(a = [True, False],
-                                              size = N, p = [0.5, 0.5],
-                                              replace = True)
+        chromosomeLogical1 = np.random.choice(a=[True, False],
+                                              size=N, p=[0.5, 0.5],
+                                              replace=True)
         chromosomeLogical2 = np.logical_not(chromosomeLogical1)
 
         chromosome1 = np.zeros(N)

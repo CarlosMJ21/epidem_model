@@ -172,7 +172,7 @@ class Population():
         newGeneration = []
         newGenAp = newGeneration.append
 
-        for i in range(self.numInd):
+        for _ in range(self.numInd):
             indices = self._select_individuals(scores)
 
             child1 = \
@@ -220,14 +220,12 @@ class Population():
         for i in np.arange(2):
 
             # Two pairs of parents are chosen
-            firstCandidate = np.random.choice(
-                            a = np.arange(self.numInd),
-                            size = 2,
-                            replace = False)
-            secondCandidate = np.random.choice(
-                            a = np.arange(self.numInd),
-                            size = 2,
-                            replace = False)
+            firstCandidate = np.random.choice(a=np.arange(self.numInd),
+                                              size=2,
+                                              replace=False)
+            secondCandidate = np.random.choice(a=np.arange(self.numInd),
+                                               size=2,
+                                               replace=False)
 
             # The one with better score is taken from each pair
             if scores[firstCandidate[0]] > scores[firstCandidate[1]]:
