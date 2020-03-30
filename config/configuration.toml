@@ -6,17 +6,17 @@
 [population]
     num_generations = 20
     size_population = 40
-    prob_mutation = 0.1
-    pressure = 0.03
+    prob_mutation = 0.3
+    pressure = 0.25
     optimisation = 'minimise'
-    crossover = 'one_point'
+    crossover = 'different_points'
     mutation = 'normal'
     num_genes = 5
     min_values = 0.0
-    max_values = 1.0
+    max_values = 0.1
     
     [population.fitness_function]
         epidemicModel = 'SEIR'
-        initialStates = [2999995.0, 0.0, 5.0, 0.0, 0.0]
-        period = 22.0
+        initialStates = [2999971.0, 0.0, 29.0, 0.0, 0.0]
+        period = 29.0
         step = 1
