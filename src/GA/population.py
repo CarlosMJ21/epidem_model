@@ -163,24 +163,23 @@ class Population():
         ----------
 
         """
-        optimiseDict = {'maximise': -1,
-                        'minimise': 1
+        optimiseDict = {'maximise': 1,
+                        'minimise': -1
                         }
         m = optimiseDict[self.config['optimisation']]
 
-        scores = self._scores()
-        ranking = np.argsort(scores)[::m]
+        scores = np.array(self._scores())**m
         newGeneration = []
         newGenAp = newGeneration.append
 
-        for i, _ in enumerate(ranking):
-            if i <= self.numInd / 2:
-                child1, child2 = \
-                    self.individuals[ranking[i]].offspring(
-                        self.individuals[ranking[i+1]])
+        for _ in range(self.numInd):
+            indices = self._select_individuals(scores)
 
-                newGenAp(child1)
-                newGenAp(child2)
+            child1 = \
+                self.individuals[indices[0]].offspring(
+                    self.individuals[indices[1]])
+
+            newGenAp(child1)
 
         newGeneration = newGeneration[:self.numInd]
         self.individuals = newGeneration
@@ -200,6 +199,54 @@ class Population():
             self.new_generation()
 
             self.mutation(self.config['prob_mutation'])
+
+    def _select_individuals(self, scores: np.ndarray) -> np.ndarray:
+        """
+        Select the individuals to breed
+
+        Parameters
+        ----------
+        scores : np.ndarray (self.numInd) [float]
+            Fitting scores of the individuals
+
+        Returns
+        ----------
+        selectedIndices : np.ndarray [int]
+            Indices selected to be parents
+
+
+        """
+        selectedIndices = np.repeat(None, 2)
+        for i in np.arange(2):
+
+            # Two pairs of parents are chosen
+            firstCandidate = np.random.choice(a=np.arange(self.numInd),
+                                              size=2,
+                                              replace=False)
+            secondCandidate = np.random.choice(a=np.arange(self.numInd),
+                                               size=2,
+                                               replace=False)
+
+            # The one with better score is taken from each pair
+            if scores[firstCandidate[0]] > scores[firstCandidate[1]]:
+                firstChosen = firstCandidate[0]
+            else:
+                firstChosen = firstCandidate[1]
+
+            if scores[secondCandidate[0]] > scores[secondCandidate[1]]:
+                secondChosen = secondCandidate[0]
+            else:
+                secondChosen = secondCandidate[1]
+
+            # The two winners are compared
+            if scores[firstChosen] > scores[secondChosen]:
+                finalIndex = firstChosen
+            else:
+                finalIndex = secondChosen
+
+            selectedIndices[i] = finalIndex
+
+        return selectedIndices
 
     def _scores(self):
         """
