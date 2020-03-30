@@ -149,6 +149,8 @@ def test(params):
 
     ax.legend()
 
+    return statesAllPeriod[::int(24/step)]
+
 
 def get_curves(epidemicModel: str, initialStates: list, params: list,
                period: float, step: float) -> np.ndarray:
@@ -241,4 +243,4 @@ def fitness_function(epidemicModel: str, initialStates: list, params: list,
 
 if __name__ == "__main__":
     PARAMS = main()
-    test(PARAMS)
+    statesAllPeriod = test(PARAMS)

@@ -149,7 +149,8 @@ class Individual():
         """
         # Select the crossover method for the offspring
         offspringDict = {'one_point': self._crossover_one_point,
-                         'multiple_points': None}
+                         'multiple_points': None,
+                         'different_points': self._crossover_different_points}
 
         return offspringDict[self.crossover](secondParent)
 
@@ -197,24 +198,55 @@ class Individual():
         tP = int(np.random.rand() * N)
 
         chromosome1 = np.zeros(N)
-        chromosome2 = np.zeros(N)
 
         # Creates the chromosomes intersecting both parent genes
         chromosome1[:tP] = self.chromosome[:tP]
         chromosome1[tP:] = secondParent.chromosome[tP:]
 
-        chromosome2[tP:] = self.chromosome[tP:]
-        chromosome2[:tP] = secondParent.chromosome[:tP]
+        # Creates the child
+        child1 = self.__class__(self.fitnessFunc, self.crossover,
+                                self.mutation, chromosome1)
+
+        return child1
+
+    def _crossover_different_points(self, secondParent):
+        """
+        Computates the offspring of two individuals.
+
+
+        Parameters
+        ----------
+        secondParent : ~individual.Individual
+            Second individual implied in the crossover
+
+        Returns
+        -------
+        child1 : ~individual.Individual
+            First individual of the offspring
+
+        child2 : ~individual.Individual
+            Second individual of the offspring
+
+        """
+        N = self.numGenes
+        # Points to choose
+        chromosomeLogical1 = np.random.choice(a = [True, False],
+                                              size = N, p = [0.5, 0.5],
+                                              replace = True)
+        chromosomeLogical2 = np.logical_not(chromosomeLogical1)
+
+        chromosome1 = np.zeros(N)
+
+        # Creates the chromosomes intersecting both parent genes
+        chromosome1[chromosomeLogical1] = self.chromosome[chromosomeLogical1]
+        chromosome1[chromosomeLogical2] = \
+            secondParent.chromosome[chromosomeLogical2]
 
         # Creates the child
         child1 = self.__class__(self.fitnessFunc, self.crossover,
                                 self.mutation, chromosome1)
 
-        child2 = self.__class__(secondParent.fitnessFunc,
-                                secondParent.crossover,
-                                secondParent.mutation, chromosome2)
-
-        return child1, child2
+        return child1
 
     def _mutation_normal(self, pressure) -> None:
         """
