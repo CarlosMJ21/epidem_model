@@ -1,6 +1,6 @@
 flake8==3.7.9
 matplotlib==3.1.2
-numpy==1.17.4
+numpy==1.22.0
 pandas==0.25.3
 pylint==2.4.4
 toml==0.10.0
